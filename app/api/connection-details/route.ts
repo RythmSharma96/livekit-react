@@ -32,8 +32,7 @@ export async function POST(req: Request) {
     // Parse agent configuration from request body or environment variable
     const body = await req.json();
     const agentName: string | undefined =
-      body?.room_config?.agents?.[0]?.agent_name ||
-      process.env.AGENT_NAME ||
+      body?.room_config?.agents?.[0]?.agent_name || process.env.AGENT_NAME ||
       undefined;
 
     // DEBUG: Log agent name information
