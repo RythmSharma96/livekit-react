@@ -29,14 +29,32 @@ export async function POST(req: Request) {
       throw new Error('LIVEKIT_API_SECRET is not defined');
     }
 
-    // Parse agent configuration from request body
+    // Parse agent configuration from request body or environment variable
     const body = await req.json();
-    const agentName: string = body?.room_config?.agents?.[0]?.agent_name;
+    const agentName: string | undefined = body?.room_config?.agents?.[0]?.agent_name || process.env.AGENT_NAME || undefined;
+
+    // DEBUG: Log agent name information
+    console.log('=== Agent Dispatch Debug ===');
+    console.log('AGENT_NAME from env:', process.env.AGENT_NAME);
+    console.log('agentName from body:', body?.room_config?.agents?.[0]?.agent_name);
+    console.log('Final agentName being used:', agentName);
+    console.log('agentName type:', typeof agentName);
+    console.log('agentName length:', agentName?.length);
+    if (agentName) {
+      console.log('agentName JSON:', JSON.stringify(agentName));
+      console.log('agentName has spaces:', agentName.includes(' '));
+      console.log('agentName trimmed:', agentName.trim());
+    }
+    console.log('===========================');
 
     // Generate participant token
     const participantName = 'user';
     const participantIdentity = `voice_assistant_user_${Math.floor(Math.random() * 10_000)}`;
-    const roomName = `voice_assistant_room_${Math.floor(Math.random() * 10_000)}`;
+
+    // Example: room1234567890
+    const calledNumber = "+14632239626";
+    const roomName = `room_${calledNumber}`;
+
 
     const participantToken = await createParticipantToken(
       { identity: participantIdentity, name: participantName },
@@ -82,9 +100,18 @@ function createParticipantToken(
   at.addGrant(grant);
 
   if (agentName) {
+    // Trim whitespace from agent name (spaces can cause matching issues)
+    const trimmedAgentName = agentName.trim();
+    console.log('Setting roomConfig with agentName:', trimmedAgentName);
+    console.log('Original agentName:', JSON.stringify(agentName));
+    console.log('Trimmed agentName:', JSON.stringify(trimmedAgentName));
+    
     at.roomConfig = new RoomConfiguration({
-      agents: [{ agentName }],
+      agents: [{ agentName: trimmedAgentName }],
     });
+    console.log('roomConfig set successfully');
+  } else {
+    console.log('No agentName provided - using automatic dispatch');
   }
 
   return at.toJwt();
