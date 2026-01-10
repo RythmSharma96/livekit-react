@@ -34,14 +34,18 @@ export const WelcomeView = ({
         <WelcomeImage />
 
         <p className="text-foreground max-w-prose pt-1 leading-6 font-medium">
-          Chat live with Rhythmiq's Voice AI agent
+          Chat live with Rhythmiq&apos;s Voice AI agent
         </p>
 
-        <Button variant="primary" size="lg" onClick={onStartCall} className="mt-6 w-64 font-mono bg-indigo-600 hover:bg-indigo-800 text-white">
+        <Button
+          variant="primary"
+          size="lg"
+          onClick={onStartCall}
+          className="mt-6 w-64 bg-indigo-600 font-mono text-white hover:bg-indigo-800"
+        >
           {startButtonText}
         </Button>
       </section>
-
     </div>
   );
 };

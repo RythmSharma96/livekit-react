@@ -31,7 +31,10 @@ export async function POST(req: Request) {
 
     // Parse agent configuration from request body or environment variable
     const body = await req.json();
-    const agentName: string | undefined = body?.room_config?.agents?.[0]?.agent_name || process.env.AGENT_NAME || undefined;
+    const agentName: string | undefined =
+      body?.room_config?.agents?.[0]?.agent_name ||
+      process.env.AGENT_NAME ||
+      undefined;
 
     // DEBUG: Log agent name information
     console.log('=== Agent Dispatch Debug ===');
@@ -52,9 +55,8 @@ export async function POST(req: Request) {
     const participantIdentity = `voice_assistant_user_${Math.floor(Math.random() * 10_000)}`;
 
     // Example: room1234567890
-    const calledNumber = "+14632239626";
+    const calledNumber = '+14632239626';
     const roomName = `room_${calledNumber}`;
-
 
     const participantToken = await createParticipantToken(
       { identity: participantIdentity, name: participantName },
@@ -105,7 +107,7 @@ function createParticipantToken(
     console.log('Setting roomConfig with agentName:', trimmedAgentName);
     console.log('Original agentName:', JSON.stringify(agentName));
     console.log('Trimmed agentName:', JSON.stringify(trimmedAgentName));
-    
+
     at.roomConfig = new RoomConfiguration({
       agents: [{ agentName: trimmedAgentName }],
     });
