@@ -4,6 +4,7 @@ import { headers } from 'next/headers';
 import { ThemeProvider } from '@/components/app/theme-provider';
 import { ThemeToggle } from '@/components/app/theme-toggle';
 import { cn, getAppConfig, getStyles } from '@/lib/utils';
+import { Analytics } from "@vercel/analytics/next"
 import '@/styles/globals.css';
 
 const publicSans = Public_Sans({
@@ -75,6 +76,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
             <ThemeToggle className="translate-y-20 transition-transform delay-150 duration-300 group-hover:translate-y-0" />
           </div>
         </ThemeProvider>
+        <Analytics />
       </body>
     </html>
   );
