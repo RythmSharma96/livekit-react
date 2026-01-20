@@ -1,4 +1,9 @@
+'use client';
+
+import { useState } from 'react';
 import { Button } from '@/components/livekit/button';
+import { UseCaseCard } from '@/components/app/use-case-card';
+import { UseCase } from '@/lib/use-cases';
 
 function WelcomeImage() {
   return (
@@ -20,7 +25,7 @@ function WelcomeImage() {
 
 interface WelcomeViewProps {
   startButtonText: string;
-  onStartCall: () => void;
+  onStartCall: (useCase: UseCase) => void;
 }
 
 export const WelcomeView = ({
@@ -28,23 +33,61 @@ export const WelcomeView = ({
   onStartCall,
   ref,
 }: React.ComponentProps<'div'> & WelcomeViewProps) => {
+  const [selectedUseCase, setSelectedUseCase] = useState<UseCase | null>(null);
+
+  const handleStartCall = () => {
+    if (selectedUseCase) {
+      onStartCall(selectedUseCase);
+    }
+  };
+
   return (
     <div ref={ref}>
-      <section className="bg-background flex flex-col items-center justify-center text-center">
+      <section className="bg-background flex flex-col items-center justify-center px-4 text-center">
         <WelcomeImage />
 
         <p className="text-foreground max-w-prose pt-1 leading-6 font-medium">
           Chat live with Rhythmiq&apos;s Voice AI agent
         </p>
 
+        <p className="text-muted-foreground mt-2 text-sm">
+          Select a demo scenario to get started
+        </p>
+
+        {/* Use Case Cards */}
+        <div className="mt-6 grid w-full max-w-3xl grid-cols-1 gap-4 md:grid-cols-3">
+          <UseCaseCard
+            useCase={UseCase.ORDER_DELIVERY}
+            selected={selectedUseCase === UseCase.ORDER_DELIVERY}
+            onSelect={setSelectedUseCase}
+          />
+          <UseCaseCard
+            useCase={UseCase.RESERVATION}
+            selected={selectedUseCase === UseCase.RESERVATION}
+            onSelect={setSelectedUseCase}
+          />
+          <UseCaseCard
+            useCase={UseCase.TAKEAWAY}
+            selected={selectedUseCase === UseCase.TAKEAWAY}
+            onSelect={setSelectedUseCase}
+          />
+        </div>
+
         <Button
           variant="primary"
           size="lg"
-          onClick={onStartCall}
-          className="mt-6 w-64 bg-indigo-600 font-mono text-white hover:bg-indigo-800"
+          onClick={handleStartCall}
+          disabled={!selectedUseCase}
+          className="mt-8 w-64 bg-indigo-600 font-mono text-white hover:bg-indigo-800 disabled:cursor-not-allowed disabled:opacity-50"
         >
           {startButtonText}
         </Button>
+
+        {!selectedUseCase && (
+          <p className="text-muted-foreground mt-3 text-xs">
+            Please select a scenario above to continue
+          </p>
+        )}
       </section>
     </div>
   );

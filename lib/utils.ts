@@ -4,6 +4,7 @@ import { TokenSource } from 'livekit-client';
 import { twMerge } from 'tailwind-merge';
 import { APP_CONFIG_DEFAULTS } from '@/app-config';
 import type { AppConfig } from '@/app-config';
+import type { UseCase } from '@/lib/use-cases';
 
 export const CONFIG_ENDPOINT = process.env.NEXT_PUBLIC_APP_CONFIG_ENDPOINT;
 export const SANDBOX_ID = process.env.SANDBOX_ID;
@@ -99,9 +100,13 @@ export function getStyles(appConfig: AppConfig) {
 /**
  * Get a token source for a sandboxed LiveKit session
  * @param appConfig - The app configuration
+ * @param useCaseRef - A ref containing the selected use case
  * @returns A token source for a sandboxed LiveKit session
  */
-export function getSandboxTokenSource(appConfig: AppConfig) {
+export function getSandboxTokenSource(
+  appConfig: AppConfig,
+  useCaseRef?: React.MutableRefObject<UseCase | null>
+) {
   return TokenSource.custom(async () => {
     const url = new URL(process.env.NEXT_PUBLIC_CONN_DETAILS_ENDPOINT!, window.location.origin);
     const sandboxId = appConfig.sandboxId ?? '';
@@ -120,6 +125,32 @@ export function getSandboxTokenSource(appConfig: AppConfig) {
         },
         body: JSON.stringify({
           room_config: roomConfig,
+          useCase: useCaseRef?.current ?? undefined,
+        }),
+      });
+      return await res.json();
+    } catch (error) {
+      console.error('Error fetching connection details:', error);
+      throw new Error('Error fetching connection details!');
+    }
+  });
+}
+
+/**
+ * Get a token source for a local LiveKit session (non-sandbox)
+ * @param useCaseRef - A ref containing the selected use case
+ * @returns A token source for a local LiveKit session
+ */
+export function getLocalTokenSource(useCaseRef?: React.MutableRefObject<UseCase | null>) {
+  return TokenSource.custom(async () => {
+    try {
+      const res = await fetch('/api/connection-details', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          useCase: useCaseRef?.current ?? undefined,
         }),
       });
       return await res.json();

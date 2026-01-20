@@ -34,6 +34,9 @@ export async function POST(req: Request) {
     const agentName: string | undefined =
       body?.room_config?.agents?.[0]?.agent_name || process.env.AGENT_NAME || undefined;
 
+    // Extract use case from request body
+    const useCase: string | undefined = body?.useCase;
+
     // DEBUG: Log agent name information
     console.log('=== Agent Dispatch Debug ===');
     console.log('AGENT_NAME from env:', process.env.AGENT_NAME);
@@ -41,6 +44,7 @@ export async function POST(req: Request) {
     console.log('Final agentName being used:', agentName);
     console.log('agentName type:', typeof agentName);
     console.log('agentName length:', agentName?.length);
+    console.log('useCase:', useCase);
     if (agentName) {
       console.log('agentName JSON:', JSON.stringify(agentName));
       console.log('agentName has spaces:', agentName.includes(' '));
@@ -59,7 +63,8 @@ export async function POST(req: Request) {
     const participantToken = await createParticipantToken(
       { identity: participantIdentity, name: participantName },
       roomName,
-      agentName
+      agentName,
+      useCase
     );
 
     // Return connection details
@@ -84,7 +89,8 @@ export async function POST(req: Request) {
 function createParticipantToken(
   userInfo: AccessTokenOptions,
   roomName: string,
-  agentName?: string
+  agentName?: string,
+  useCase?: string
 ): Promise<string> {
   const at = new AccessToken(API_KEY, API_SECRET, {
     ...userInfo,
@@ -98,6 +104,12 @@ function createParticipantToken(
     canSubscribe: true,
   };
   at.addGrant(grant);
+
+  // Set participant metadata with use case
+  if (useCase) {
+    at.metadata = JSON.stringify({ useCase });
+    console.log('Setting participant metadata:', at.metadata);
+  }
 
   if (agentName) {
     // Trim whitespace from agent name (spaces can cause matching issues)

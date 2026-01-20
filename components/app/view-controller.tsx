@@ -5,6 +5,8 @@ import { useSessionContext } from '@livekit/components-react';
 import type { AppConfig } from '@/app-config';
 import { SessionView } from '@/components/app/session-view';
 import { WelcomeView } from '@/components/app/welcome-view';
+import { useUseCaseContext } from '@/components/app/app';
+import type { UseCase } from '@/lib/use-cases';
 
 const MotionWelcomeView = motion.create(WelcomeView);
 const MotionSessionView = motion.create(SessionView);
@@ -33,6 +35,14 @@ interface ViewControllerProps {
 
 export function ViewController({ appConfig }: ViewControllerProps) {
   const { isConnected, start } = useSessionContext();
+  const { setUseCase } = useUseCaseContext();
+
+  const handleStartCall = (useCase: UseCase) => {
+    // Set the use case in the ref before starting
+    setUseCase(useCase);
+    // Start the session - the token source will read from the ref
+    start();
+  };
 
   return (
     <AnimatePresence mode="wait">
@@ -42,7 +52,7 @@ export function ViewController({ appConfig }: ViewControllerProps) {
           key="welcome"
           {...VIEW_MOTION_PROPS}
           startButtonText={appConfig.startButtonText}
-          onStartCall={start}
+          onStartCall={handleStartCall}
         />
       )}
       {/* Session view */}
